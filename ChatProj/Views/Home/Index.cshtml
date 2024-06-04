@@ -1,0 +1,119 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="~/Content/StyleSheet1.css"/>
+</head>
+<body>
+    <div class="contacts-section" id="contactsSection">
+        <div class="contacts-header">
+            <div>Contacts</div>
+        </div>
+        <div class="contacts-list">
+            <div class="contact" onclick="openChat('Contact 1')">
+                <img src="https://via.placeholder.com/45" alt="Contact 1">
+                <div>Contact 1</div>
+            </div>
+            <div class="contact" onclick="openChat('Contact 2')">
+                <img src="https://via.placeholder.com/45" alt="Contact 2">
+                <div>Contact 2</div>
+            </div>
+        </div>
+    </div>
+    <div class="resizer" id="resizer"></div>
+    <div class="chat-container">
+        <div class="pH">Select a contact
+        </div>
+        <div class="chat-header">
+            <img src="https://via.placeholder.com/45" alt="User" id="chatUserImage">
+            <div class="name" id="chatUserName">Select a contact</div>
+        </div>
+        <div class="chat-body" id="chatBody">  
+        </div>
+        <div class="chat-footer">
+            <input type="text" placeholder="Type a message" id="messageInput">
+            <button id="sendMessageButton">Send</button>
+        </div>
+    </div>
+     
+    <script src="~/Scripts/myscript.js"></script>
+    <script>
+        let socket = io();
+
+        function openChat(contactName) {
+            document.getElementById('chatUserName').textContent = contactName;
+            // Reset chat body for simplicity
+            // Fetch and display last 50 messages here.
+            document.getElementById('chatBody').innerHTML = '';
+
+            document.querySelector('.chat-header').style.display = 'flex';
+            document.querySelector('.chat-body').style.display = 'block';
+            document.querySelector('.chat-footer').style.display = 'flex';
+            document.querySelector('.pH').style.display = 'none';
+        }   
+
+        document.getElementById('sendMessageButton').addEventListener('click', function () {
+            if (document.getElementById('chatUserName').textContent === "Select a contact") {
+                return;
+            }
+
+            var input = document.getElementById('messageInput');
+            var messageText = input.value.trim();
+            if (messageText) {
+                var messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'sent');
+                var contentElement = document.createElement('div');
+                contentElement.classList.add('content');
+                contentElement.textContent = messageText;
+                messageElement.appendChild(contentElement);
+                document.getElementById('chatBody').appendChild(messageElement);
+                input.value = '';
+                document.getElementById('chatBody').scrollTop = document.getElementById('chatBody').scrollHeight;
+            }
+        });
+
+        document.getElementById('messageInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('sendMessageButton').click();
+            }
+        });
+
+        // Resizer functionality
+        const resizer = document.getElementById('resizer');
+        const leftSide = document.getElementById('contactsSection');
+        const rightSide = document.querySelector('.chat-container');
+        let startX, startWidth;
+
+        resizer.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            startWidth = leftSide.getBoundingClientRect().width;
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResize);
+        });
+
+        function resize(e) {
+            const newWidth = startWidth + (e.clientX - startX);
+            if (newWidth > 200 && newWidth < window.innerWidth * 0.4) {
+                leftSide.style.width = newWidth + 'px';
+            }
+        }
+
+        function stopResize() {
+            document.removeEventListener('mousemove', resize);
+            document.removeEventListener('mouseup', stopResize);
+        }
+    </script>
+</body>
+</html>
+
+
